@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
   workflow_dispatch:
 
 jobs:
@@ -14,6 +14,14 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Verify environment variables
+        run: |
+          echo "Length of BUILD_CERTIFICATE_BASE64: ${#BUILD_CERTIFICATE_BASE64}"
+          echo "Length of BUILD_PROVISION_PROFILE_BASE64: ${#BUILD_PROVISION_PROFILE_BASE64}"
+        env:
+          BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
+          BUILD_PROVISION_PROFILE_BASE64: ${{ secrets.BUILD_PROVISION_PROFILE_BASE64 }}
 
       - name: Install the Apple certificate and provisioning profile
         env:
@@ -28,6 +36,10 @@ jobs:
           CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
           PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
           KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+
+          # Log lengths of base64 strings
+          echo "Length of BUILD_CERTIFICATE_BASE64: ${#BUILD_CERTIFICATE_BASE64}"
+          echo "Length of BUILD_PROVISION_PROFILE_BASE64: ${#BUILD_PROVISION_PROFILE_BASE64}"
 
           # Import certificate and provisioning profile from secrets
           echo "Decoding and saving the certificate and provisioning profile..."
